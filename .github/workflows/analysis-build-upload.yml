@@ -1,0 +1,38 @@
+name: Analysis, build, pack and upload artifact.
+on:
+    workflow_dispatch:
+        inputs:
+            repository_name:
+                description: 'Nombre del repositorio a procesar'
+                requered: true
+                type: string
+            branch_name:
+                description: 'Rama del repositorio a procesar'
+                required: false
+                default: 'main'
+                type: string
+            environment:
+                description: 'Entorno de despliegue'
+                required: false
+                default: 'dev'
+jobs:
+    building-artifact:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Dinamic checkout code
+              uses: actions/checkout@v4.2.2
+              with:
+                repository: ${{ github.repository_owner }}/${{ github.event.inputs.repository_name }}
+                ref: ${{ github.event.inputs.branch_name }}
+                token: ${{ secrets.REPO_ACCESS_TOKEN }}
+                fetch-depth: 0
+            - name: Set Up JDK 17
+              run: echo "Setting JDK 17"
+            - name: Cache Sonar
+              run: echo "Caching sonar"
+            - name: Sending to SonarQube Scan
+              run: echo "Sending project to Sonar"
+            - name: Build and Pack
+              run: echo "Building and packing artifact"
+            - name: Sending to Nexus
+              run: echo "Uploading artifact"
