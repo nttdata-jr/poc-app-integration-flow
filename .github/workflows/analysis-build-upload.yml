@@ -4,7 +4,7 @@ on:
         inputs:
             repository_name:
                 description: 'Nombre del repositorio a procesar'
-                requered: true
+                required: true
                 type: string
             branch_name:
                 description: 'Rama del repositorio a procesar'
@@ -15,6 +15,14 @@ on:
                 description: 'Entorno de despliegue'
                 required: false
                 default: 'dev'
+            port_run_id:
+                description: 'ID de la ejecucion en Port'
+                required: false
+                type: string
+            port_context:
+                description: 'Contexto proporcionado por Port'
+                required: false
+                type: string
 jobs:
     building-artifact:
         runs-on: ubuntu-latest
