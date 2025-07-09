@@ -8,13 +8,11 @@ on:
                 type: string
             branch_name:
                 description: 'Rama del repositorio a procesar'
-                required: false
-                default: 'main'
+                required: true
                 type: string
             environment:
                 description: 'Entorno de despliegue'
-                required: false
-                default: 'dev'
+                required: true
             port_run_id:
                 description: 'ID de la ejecucion en Port'
                 required: false
