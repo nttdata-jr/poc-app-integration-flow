@@ -42,3 +42,26 @@ jobs:
               run: echo "Building and packing artifact"
             - name: Sending to Nexus
               run: echo "Uploading artifact"
+            - name: Report status to Port
+              uses: port-labs/port-github-action@v1.7.2
+              with:
+                clientId: ${{ secrets.PORT_CLIENT_ID }}
+                clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+                baseUrl: https://api.getport.io
+                identifier: ${{ github.event.inputs.repository_name }}
+                blueprint: ${{ github.event.inputs.port_context.blueprint }}
+                properties: |
+                  {
+                    "last_build_status": "SUCCESS",
+                    "last_build_date": "{{ env.BUILD_DATE }}",
+                    "sonar_quality_gate_status": "PASSED"
+                  }
+                runId: ${{ github.event.inputs.port_context.runId }}
+                status: "SUCCESS"
+                log: |
+                  {
+                    "message": "Build and upload artifact completed successfully.",
+                    "repository": "${{ github.event.inputs.repository_name }}",
+                    "branch": "${{ github.event.inputs.branch_name }}",
+                    "environment": "${{ github.event.inputs.environment }}"
+                  }
