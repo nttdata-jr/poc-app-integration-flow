@@ -21,6 +21,10 @@ on:
                 description: 'Contexto proporcionado por Port'
                 required: false
                 type: string
+            blueprint_id:
+                description: 'Nombre del blueprint'
+                required: false
+                type: string
 jobs:
     building-artifact:
         runs-on: ubuntu-latest
