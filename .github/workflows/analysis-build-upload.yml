@@ -52,7 +52,7 @@ jobs:
                 clientId: ${{ secrets.PORT_CLIENT_ID }}
                 clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
                 baseUrl: https://api.getport.io
-                operation: UPSERT_ENTITY
+                operation: PATCH_RUN
                 identifier: ${{ github.event.inputs.repository_name }}
                 blueprint: ${{ github.event.inputs.port_context.blueprint_id }}
                 properties: |
@@ -63,10 +63,9 @@ jobs:
                   }
                 runId: ${{ github.event.inputs.port_run_id }}
                 status: "SUCCESS"
-                log: |
-                  {
-                    "message": "Build and upload artifact completed successfully.",
-                    "repository": "${{ github.event.inputs.repository_name }}",
-                    "branch": "${{ github.event.inputs.branch_name }}",
-                    "environment": "${{ github.event.inputs.environment }}"
-                  }
+                logs: |
+                  SonarCloud Quality Gate Status: ${{ steps.sonarqube-quality-gate-check.outputs.qualityGateStatus }}
+                  Análisis completado para el repositorio: ${{ github.event.inputs.repository_name }}.
+                  Utilizando el branch: ${{ github.event.inputs.branch_name }}.
+                  En el ambiente: ${{ github.event.inputs.environment }}
+                  Revisar en SonarCloud para más detalles.
