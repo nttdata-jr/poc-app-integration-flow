@@ -63,7 +63,7 @@ jobs:
                   }
                 runId: ${{ github.event.inputs.port_run_id }}
                 status: "SUCCESS"
-                logs: |
+                logMessage: |
                   SonarCloud Quality Gate Status: ${{ steps.sonarqube-quality-gate-check.outputs.qualityGateStatus }}
                   Análisis completado para el repositorio: ${{ github.event.inputs.repository_name }}.
                   Utilizando el branch: ${{ github.event.inputs.branch_name }}.
