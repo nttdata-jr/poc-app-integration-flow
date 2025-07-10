@@ -48,15 +48,16 @@ jobs:
                 clientId: ${{ secrets.PORT_CLIENT_ID }}
                 clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
                 baseUrl: https://api.getport.io
+                operation: UPSERT_ENTITY
                 identifier: ${{ github.event.inputs.repository_name }}
-                blueprint: ${{ github.event.inputs.blueprint }}
+                blueprint: ${{ github.event.inputs.port_context.blueprint_id }}
                 properties: |
                   {
                     "last_build_status": "SUCCESS",
                     "last_build_date": "{{ env.BUILD_DATE }}",
                     "sonar_quality_gate_status": "PASSED"
                   }
-                runId: ${{ github.event.inputs.runId }}
+                runId: ${{ github.event.inputs.port_run_id }}
                 status: "SUCCESS"
                 log: |
                   {
