@@ -47,6 +47,7 @@ jobs:
             - name: Sending to Nexus
               run: echo "Uploading artifact"
             - name: Report status to Port
+              if: always()
               uses: port-labs/port-github-action@v1.7.2
               with:
                 clientId: ${{ secrets.PORT_CLIENT_ID }}
