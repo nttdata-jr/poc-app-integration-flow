@@ -49,14 +49,14 @@ jobs:
                 clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
                 baseUrl: https://api.getport.io
                 identifier: ${{ github.event.inputs.repository_name }}
-                blueprint: ${{ github.event.inputs.port_context.blueprint }}
+                blueprint: ${{ github.event.inputs.blueprint }}
                 properties: |
                   {
                     "last_build_status": "SUCCESS",
                     "last_build_date": "{{ env.BUILD_DATE }}",
                     "sonar_quality_gate_status": "PASSED"
                   }
-                runId: ${{ github.event.inputs.port_context.runId }}
+                runId: ${{ github.event.inputs.runId }}
                 status: "SUCCESS"
                 log: |
                   {
