@@ -60,6 +60,66 @@ jobs:
                   -Dsonar.organization=nttdata-jr
                   -Dsonar.projectKey=${{ github.event.inputs.repository_name }}
                   -Dsonar.sources=.
+            - name: Sonar Quality Gate Check
+              id: sonarqube-quality-gate-check
+              uses: SonarSource/sonarqube-quality-gate-action@v1.2.0
+              timeout-minutes: 3
+              env:
+                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+            - name: Get SonarCloud Metrics
+              id: sonar_metrics
+              run: |
+                SONAR_ORGANIZATION="nttdata-jr"
+                SONAR_PROJECT_KEY="${{ github.event.inputs.repository_name }}"
+                SONAR_API_URL="https://sonarcloud.io/api/measures/search?projectKeys=hello-world-biec&metricKeys=bugs,vulnerabilities,code_smells,coverage,duplicated_lines_density"
+                # Llama a la API de SonarCloud
+                METRICS_RESPONSE=$(curl -s -H "Authorization: Basic $(echo -n ${SONAR_TOKEN}: | base64)" "${SONAR_API_URL}")
+                # Extrae las métricas y las convierte a JSON para un output del paso
+                BUGS=$(echo "$METRICS_RESPONSE" | jq -r '.component.measures[] | select(.metric == "bugs") | .value // 0')
+                VULNERABILITIES=$(echo "$METRICS_RESPONSE" | jq -r '.component.measures[] | select(.metric == "vulnerabilities") | .value // 0')
+                CODE_SMELLS=$(echo "$METRICS_RESPONSE" | jq -r '.component.measures[] | select(.metric == "code_smells") | .value // 0')
+                COVERAGE=$(echo "$METRICS_RESPONSE" | jq -r '.component.measures[] | select(.metric == "coverage") | .value // 0')
+                DUPLICATIONS=$(echo "$METRICS_RESPONSE" | jq -r '.component.measures[] | select(.metric == "duplicated_lines_density") | .value // 0')
+                echo "bugs=$BUGS" >> $GITHUB_OUTPUT
+                echo "vulnerabilities=$VULNERABILITIES" >> $GITHUB_OUTPUT
+                echo "code_smells=$CODE_SMELLS" >> $GITHUB_OUTPUT
+                echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
+                echo "duplications=$DUPLICATIONS" >> $GITHUB_OUTPUT
+              env:
+                SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+                shell: bash
+            - name: Reportar estado y métricas a Port.io
+              if: always()
+              uses: port-labs/port-github-action@v1.7.2
+              with:
+                  clientId: ${{ secrets.PORT_CLIENT_ID }}
+                  clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+                  baseUrl: https://api.getport.io
+                  operation: UPSERT_ENTITY
+                  identifier: ${{ github.event.inputs.repository_name }}
+                  blueprint: ${{ github.event.inputs.blueprint_id }}
+                  properties: |
+                    {
+                      "sonar_quality_gate_status": "${{ steps.sonarqube-quality-gate-check.outputs.qualityGateStatus }}",
+                      "sonar_bugs": ${{ steps.sonar_metrics.outputs.bugs }},
+                      "sonar_vulnerabilities": ${{ steps.sonar_metrics.outputs.vulnerabilities }},
+                      "sonar_code_smells": ${{ steps.sonar_metrics.outputs.code_smells }},
+                      "sonar_coverage": ${{ steps.sonar_metrics.outputs.coverage }},
+                      "sonar_duplications": ${{ steps.sonar_metrics.outputs.duplications }},
+                      "sonar_report_url": "${{ steps.sonar_report_url.outputs.sonar_report_url }}",
+                      "last_sonar_analysis_date": "${{ steps.sonarqube-quality-gate-check.outputs.analysisUrl }}"
+                    }
+                  runId: ${{ github.event.inputs.port_run_id }}
+                  status: ${{ (steps.sonarqube-quality-gate-check.outputs.qualityGateStatus == 'PASSED' && 'SUCCESS') || (steps.sonarqube-quality-gate-check.outputs.qualityGateStatus == 'FAILED' && 'FAILURE') || 'PENDING' }}
+                  logs: |
+                    --- Resumen de la Ejecución ---
+                    --- Métricas de Calidad de SonarCloud ---
+                    Bugs: ${{ steps.sonar_metrics.outputs.bugs }}
+                    Vulnerabilidades: ${{ steps.sonar_metrics.outputs.vulnerabilities }}
+                    Code Smells: ${{ steps.sonar_metrics.outputs.code_smells }}
+                    Cobertura (%): ${{ steps.sonar_metrics.outputs.coverage }}
+                    Duplicaciones (%): ${{ steps.sonar_metrics.outputs.duplications }}
+                    Reporte: ${{ steps.sonar_report_url.outputs.sonar_report_url }}
             - name: Build and Pack
               run: echo "Building and packing artifact"
             - name: Sending to Nexus
