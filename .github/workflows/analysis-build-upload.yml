@@ -89,7 +89,7 @@ jobs:
                   clientId: ${{ secrets.PORT_CLIENT_ID }}
                   clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
                   baseUrl: https://api.getport.io
-                  operation: UPSERT_ENTITY
+                  operation: UPSERT
                   identifier: ${{ github.event.inputs.repository_name }}
                   blueprint: ${{ github.event.inputs.blueprint_id }}
                   properties: |
@@ -105,7 +105,7 @@ jobs:
                     }
                   runId: ${{ github.event.inputs.port_run_id }}
                   status: ${{ (steps.sonarqube-quality-gate-check.outputs.qualityGateStatus == 'PASSED' && 'SUCCESS') || (steps.sonarqube-quality-gate-check.outputs.qualityGateStatus == 'FAILED' && 'FAILURE') || 'PENDING' }}
-                  logs: |
+                  logMessage: |
                     --- Resumen de la Ejecución ---
                     --- Métricas de Calidad de SonarCloud ---
                     Bugs: ${{ steps.sonar_metrics.outputs.bugs }}
@@ -118,27 +118,3 @@ jobs:
               run: echo "Building and packing artifact"
             - name: Sending to Nexus
               run: echo "Uploading artifact"
-            - name: Report status to Port
-              if: always()
-              uses: port-labs/port-github-action@v1.7.2
-              with:
-                clientId: ${{ secrets.PORT_CLIENT_ID }}
-                clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-                baseUrl: https://api.getport.io
-                operation: PATCH_RUN
-                identifier: ${{ github.event.inputs.repository_name }}
-                blueprint: ${{ github.event.inputs.port_context.blueprint_id }}
-                properties: |
-                  {
-                    "last_build_status": "SUCCESS",
-                    "last_build_date": "{{ env.BUILD_DATE }}",
-                    "sonar_quality_gate_status": "PASSED"
-                  }
-                runId: ${{ github.event.inputs.port_run_id }}
-                status: "SUCCESS"
-                logMessage: |
-                  SonarCloud Quality Gate Status: ${{ steps.sonarqube-quality-gate-check.outputs.qualityGateStatus }}
-                  Análisis completado para el repositorio: ${{ github.event.inputs.repository_name }}.
-                  Utilizando el branch: ${{ github.event.inputs.branch_name }}.
-                  En el ambiente: ${{ github.event.inputs.environment }}
-                  Revisar en SonarCloud para más detalles.
