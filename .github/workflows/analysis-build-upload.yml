@@ -94,7 +94,7 @@ jobs:
                   blueprint: ${{ github.event.inputs.blueprint_id }}
                   properties: |
                     {
-                      "sonar_quality_gate_status": "${{ steps.sonarqube-quality-gate-check.outputs.qualityGateStatus || 'UNKNOWN' }}",
+                      "sonar_quality_gate_status": "${{ (steps.sonarqube-quality-gate-check.outputs.qualityGateStatus == 'PASSED' && 'SUCCESS') || (steps.sonarqube-quality-gate-check.outputs.qualityGateStatus == 'FAILED' && 'FAILURE') || 'PENDING' }}",
                       "sonar_bugs": ${{ steps.sonar_metrics.outputs.bugs || 0 }},
                       "sonar_vulnerabilities": ${{ steps.sonar_metrics.outputs.vulnerabilities || 0 }},
                       "sonar_code_smells": ${{ steps.sonar_metrics.outputs.code_smells || 0 }},
