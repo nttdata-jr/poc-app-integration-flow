@@ -63,7 +63,8 @@ jobs:
             - name: Sonar Quality Gate Check
               id: sonarqube-quality-gate-check
               uses: SonarSource/sonarqube-quality-gate-action@v1.2.0
-              timeout-minutes: 3
+              with:
+                  pollingTimeoutSec: 600
               env:
                   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
             - name: Get SonarCloud Metrics
@@ -79,6 +80,7 @@ jobs:
                 echo ""
                 echo "Checking for 'component' in response:"
                 jq .component api_response.json || true
+                echo ${{ steps.sonarqube-quality-gate-check.outputs.qualityGateStatus }}
               env:
                 SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
                 shell: bash
@@ -94,7 +96,7 @@ jobs:
                   blueprint: ${{ github.event.inputs.blueprint_id }}
                   properties: |
                     {
-                      "sonar_quality_gate_status": "${{ (steps.sonarqube-quality-gate-check.outputs.qualityGateStatus == 'PASSED' && 'SUCCESS') || (steps.sonarqube-quality-gate-check.outputs.qualityGateStatus == 'FAILED' && 'FAILURE') || 'PENDING' }}",
+                      "sonar_quality_gate_status": "${{ steps.sonarqube-quality-gate-check.outputs.qualityGateStatus }}",
                       "sonar_bugs": ${{ steps.sonar_metrics.outputs.bugs || 0 }},
                       "sonar_vulnerabilities": ${{ steps.sonar_metrics.outputs.vulnerabilities || 0 }},
                       "sonar_code_smells": ${{ steps.sonar_metrics.outputs.code_smells || 0 }},
