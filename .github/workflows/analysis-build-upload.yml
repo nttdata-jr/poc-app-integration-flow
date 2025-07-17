@@ -82,13 +82,13 @@ jobs:
               env:
                 SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
                 shell: bash
-            - name: Reportar estado y métricas a Port.io
+            - name: Actualizar propiedades a Port.io
               if: always()
               uses: port-labs/port-github-action@v1.7.2
               with:
                   clientId: ${{ secrets.PORT_CLIENT_ID }}
                   clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-                  operation: PATCH_RUN
+                  operation: UPSERT
                   baseUrl: https://api.getport.io
                   identifier: ${{ github.event.inputs.repository_name }}
                   blueprint: ${{ github.event.inputs.blueprint_id }}
@@ -103,6 +103,14 @@ jobs:
                       "sonar_report_url": "${{ steps.sonar_report_url.outputs.sonar_report_url }}",
                       "last_sonar_analysis_date": "${{ steps.sonarqube-quality-gate-check.outputs.analysisUrl }}"
                     }
+            - name: Reportar estado y métricas a Port.io
+              if: always()
+              uses: port-labs/port-github-action@v1.7.2
+              with:
+                  clientId: ${{ secrets.PORT_CLIENT_ID }}
+                  clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+                  operation: PATCH_RUN
+                  baseUrl: https://api.getport.io
                   runId: ${{ github.event.inputs.port_run_id }}
                   status: ${{ (steps.sonarqube-quality-gate-check.outputs.qualityGateStatus == 'PASSED' && 'SUCCESS') || (steps.sonarqube-quality-gate-check.outputs.qualityGateStatus == 'FAILED' && 'FAILURE') || 'PENDING' }}
                   logMessage: |
