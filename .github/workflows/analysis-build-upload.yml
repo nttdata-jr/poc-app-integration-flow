@@ -94,14 +94,14 @@ jobs:
                   blueprint: ${{ github.event.inputs.blueprint_id }}
                   properties: |
                     {
-                      "sonar_quality_gate_status": "${{ steps.sonarqube-quality-gate-check.outputs.qualityGateStatus }}",
-                      "sonar_bugs": ${{ steps.sonar_metrics.outputs.bugs }},
-                      "sonar_vulnerabilities": ${{ steps.sonar_metrics.outputs.vulnerabilities }},
-                      "sonar_code_smells": ${{ steps.sonar_metrics.outputs.code_smells }},
-                      "sonar_coverage": ${{ steps.sonar_metrics.outputs.coverage }},
-                      "sonar_duplications": ${{ steps.sonar_metrics.outputs.duplications }},
-                      "sonar_report_url": "${{ steps.sonar_report_url.outputs.sonar_report_url }}",
-                      "last_sonar_analysis_date": "${{ steps.sonarqube-quality-gate-check.outputs.analysisUrl }}"
+                      "sonar_quality_gate_status": "${{ steps.sonarqube-quality-gate-check.outputs.qualityGateStatus || 'UNKNOWN' }}",
+                      "sonar_bugs": ${{ steps.sonar_metrics.outputs.bugs || 0 }},
+                      "sonar_vulnerabilities": ${{ steps.sonar_metrics.outputs.vulnerabilities || 0 }},
+                      "sonar_code_smells": ${{ steps.sonar_metrics.outputs.code_smells || 0 }},
+                      "sonar_coverage": ${{ steps.sonar_metrics.outputs.coverage || 0 }},
+                      "sonar_duplications": ${{ steps.sonar_metrics.outputs.duplications || 0 }},
+                      "sonar_report_url": "${{ steps.sonar_report_url.outputs.sonar_report_url || '' }}",
+                      "last_sonar_analysis_date": "$(date +%Y-%m-%dT%H:%M:%SZ)"
                     }
             - name: Reportar estado y métricas a Port.io
               if: always()
