@@ -83,12 +83,12 @@ jobs:
                 BUGS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric == "bugs").value // "0"')
                 VULNERABILITIES=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric == "vulnerabilities").value // "0"')
                 CODE_SMELLS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric == "code_smells").value // "0"')
-                COVERAGE=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric == "coverage").value // "0.0"')
+                # COVERAGE=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric == "coverage").value // "0.0"')
                 DUPLICATIONS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric == "duplicated_lines_density").value // "0.0"')
                 echo "bugs=${BUGS}" >> $GITHUB_OUTPUT
                 echo "vulnerabilities=${VULNERABILITIES}" >> $GITHUB_OUTPUT
                 echo "code_smells=${CODE_SMELLS}" >> $GITHUB_OUTPUT
-                echo "coverage=${COVERAGE}" >> $GITHUB_OUTPUT
+                # echo "coverage=${COVERAGE}" >> $GITHUB_OUTPUT
                 echo "duplications=${DUPLICATIONS}" >> $GITHUB_OUTPUT
                 echo "sonar_report_url=${SONAR_REPORT_URL}" >> $GITHUB_OUTPUT
               env:
@@ -110,7 +110,6 @@ jobs:
                       "sonar_bugs": ${{ steps.sonar_metrics_and_report.outputs.bugs || 0 }},
                       "sonar_vulnerabilities": ${{ steps.sonar_metrics_and_report.outputs.vulnerabilities || 0 }},
                       "sonar_code_smells": ${{ steps.sonar_metrics_and_report.outputs.code_smells || 0 }},
-                      "sonar_coverage": ${{ steps.sonar_metrics_and_report.outputs.coverage || 0 }},
                       "sonar_duplications": ${{ steps.sonar_metrics_and_report.outputs.duplications || 0 }},
                       "sonar_report_url": "${{ steps.sonar_metrics_and_report.outputs.sonar_report_url || '' }}",
                       "last_sonar_analysis_date": "$(date +%Y-%m-%dT%H:%M:%SZ)"
