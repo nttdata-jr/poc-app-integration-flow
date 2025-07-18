@@ -86,17 +86,12 @@ jobs:
                 #COVERAGE=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric == "coverage").value // "0.0"')
                 DUPLICATIONS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric == "duplicated_lines_density").value // "0.0"')
                 echo "bugs=${BUGS}"             >> $GITHUB_OUTPUT
-                cat $GITHUB_OUTPUT
                 echo "vulnerabilities=${VULNERABILITIES}" >> $GITHUB_OUTPUT
-                cat $GITHUB_OUTPUT
                 echo "code_smells=${CODE_SMELLS}"       >> $GITHUB_OUTPUT
-                cat $GITHUB_OUTPUT
                 echo "duplications=${DUPLICATIONS}"     >> $GITHUB_OUTPUT
-                cat $GITHUB_OUTPUT
                 echo "sonar_report_url=${SONAR_REPORT_URL}" >> $GITHUB_OUTPUT
-                cat $GITHUB_OUTPUT
                 echo "date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
-                cat $GITHUB_OUTPUT
+                sed -n 'l' $GITHUB_OUTPUT
               env:
                 SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
                 shell: bash
