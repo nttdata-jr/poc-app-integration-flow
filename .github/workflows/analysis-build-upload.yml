@@ -80,18 +80,17 @@ jobs:
                 echo "API Response Raw:"
                 echo "${METRICS_RESPONSE}"
                 # Extraer métricas usando jq, buscando en el array 'measures'
-                BUGS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | map(select(.metric=="bugs").value) | first // "0"')
-                VULNERABILITIES=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | map(select(.metric=="vulnerabilities").value) | first // "0"')
-                CODE_SMELLS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | map(select(.metric=="code_smells").value) | first // "0"')
+                BUGS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric=="bugs") | .value')
+                #VULNERABILITIES=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | map(select(.metric=="vulnerabilities").value) | first // "0"')
+                #CODE_SMELLS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | map(select(.metric=="code_smells").value) | first // "0"')
                 #COVERAGE=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric == "coverage").value // "0.0"')
-                DUPLICATIONS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | map(select(.metric=="duplicated_lines_density").value) // first // "0.0"')
-                echo "bugs=${BUGS}"             >> $GITHUB_OUTPUT
-                echo "vulnerabilities=${VULNERABILITIES}" >> $GITHUB_OUTPUT
-                echo "code_smells=${CODE_SMELLS}"       >> $GITHUB_OUTPUT
-                echo "duplications=${DUPLICATIONS}"     >> $GITHUB_OUTPUT
+                #DUPLICATIONS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | map(select(.metric=="duplicated_lines_density").value) // first // "0.0"')
+                echo "bugs=${BUGS:-0}"             >> $GITHUB_OUTPUT
+                #echo "vulnerabilities=0" >> $GITHUB_OUTPUT
+                #echo "code_smells=0"       >> $GITHUB_OUTPUT
+                #echo "duplications=0.0"     >> $GITHUB_OUTPUT
                 echo "sonar_report_url=${SONAR_REPORT_URL}" >> $GITHUB_OUTPUT
                 echo "date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
-                sed -n 'l' $GITHUB_OUTPUT
               env:
                 SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
                 shell: bash
