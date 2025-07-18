@@ -81,7 +81,7 @@ jobs:
                 echo "${METRICS_RESPONSE}"
                 # Extraer métricas usando jq, buscando en el array 'measures'
                 BUGS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | map(select(.metric=="bugs").value) | first // "0"')
-                VULNERABILITIES=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | | map(select(.metric=="vulnerabilities").value) | first // "0"')
+                VULNERABILITIES=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | map(select(.metric=="vulnerabilities").value) | first // "0"')
                 CODE_SMELLS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | map(select(.metric=="code_smells").value) | first // "0"')
                 #COVERAGE=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric == "coverage").value // "0.0"')
                 DUPLICATIONS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | map(select(.metric=="duplicated_lines_density").value) // first // "0.0"')
