@@ -67,20 +67,35 @@ jobs:
                   pollingTimeoutSec: 600
               env:
                   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-            - name: Get SonarCloud Metrics
-              id: sonar_metrics
+            - name: Get SonarCloud Metrics and Report
+              id: sonar_metrics_and_report
               run: |
                 SONAR_ORGANIZATION="nttdata-jr"
                 SONAR_PROJECT_KEY="${{ github.event.inputs.repository_name }}"
+                SONAR_REPORT_URL="https://sonarcloud.io/dashboard?id=${SONAR_PROJECT_KEY}"
                 SONAR_API_URL="https://sonarcloud.io/api/measures/search?projectKeys=${{ github.event.inputs.repository_name }}&metricKeys=bugs,vulnerabilities,code_smells,coverage,duplicated_lines_density"
                 echo "Calling SonarCloud API URL: ${SONAR_API_URL}"
-                curl -v -H "Authorization: Basic $(echo -n ${{ secrets.SONAR_TOKEN }}: | base64)" "${SONAR_API_URL}" > api_response.json
-                echo "API Response:"
-                cat api_response.json
-                echo ""
-                echo "Checking for 'component' in response:"
-                jq .component api_response.json || true
-                echo ${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}
+                METRICS_RESPONSE=$(curl -s -H "Authorization: Basic $(echo -n ${{ secrets.SONAR_TOKEN }}: | base64)" "${SONAR_API_URL}")
+                echo "API Response Raw:"
+                echo "${METRICS_RESPONSE}" # Para depuración
+                # Extraer métricas usando jq, buscando en el array 'measures'
+                BUGS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric == "bugs").value // "0"')
+                VULNERABILITIES=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric == "vulnerabilities").value // "0"')
+                CODE_SMELLS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric == "code_smells").value // "0"')
+                COVERAGE=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric == "coverage").value // "0.0"')
+                DUPLICATIONS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric == "duplicated_lines_density").value // "0.0"')
+                # Imprimir para verificar (y configurar como outputs de GitHub Actions)
+                echo "Bugs: ${BUGS}"
+                echo "Vulnerabilities: ${VULNERABILITIES}"
+                echo "Code Smells: ${CODE_SMELLS}"
+                echo "Coverage: ${COVERAGE}"
+                echo "Duplications: ${DUPLICATIONS}"
+                echo "bugs=${BUGS}" >> $GITHUB_OUTPUT
+                echo "vulnerabilities=${VULNERABILITIES}" >> $GITHUB_OUTPUT
+                echo "code_smells=${CODE_SMELLS}" >> $GITHUB_OUTPUT
+                echo "coverage=${COVERAGE}" >> $GITHUB_OUTPUT
+                echo "duplications=${DUPLICATIONS}" >> $GITHUB_OUTPUT
+                echo "sonar_report_url=${SONAR_REPORT_URL}" >> $GITHUB_OUTPUT
               env:
                 SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
                 shell: bash
@@ -97,11 +112,11 @@ jobs:
                   properties: |
                     {
                       "sonar_quality_gate_status": "${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}",
-                      "sonar_bugs": ${{ steps.sonar_metrics.outputs.bugs || 0 }},
-                      "sonar_vulnerabilities": ${{ steps.sonar_metrics.outputs.vulnerabilities || 0 }},
-                      "sonar_code_smells": ${{ steps.sonar_metrics.outputs.code_smells || 0 }},
-                      "sonar_coverage": ${{ steps.sonar_metrics.outputs.coverage || 0 }},
-                      "sonar_duplications": ${{ steps.sonar_metrics.outputs.duplications || 0 }},
-                      "sonar_report_url": "${{ steps.sonar_report_url.outputs.sonar_report_url || '' }}",
+                      "sonar_bugs": ${{ steps.sonar_metrics_and_report.outputs.bugs || 0 }},
+                      "sonar_vulnerabilities": ${{ steps.sonar_metrics_and_report.outputs.vulnerabilities || 0 }},
+                      "sonar_code_smells": ${{ steps.sonar_metrics_and_report.outputs.code_smells || 0 }},
+                      "sonar_coverage": ${{ steps.sonar_metrics_and_report.outputs.coverage || 0 }},
+                      "sonar_duplications": ${{ steps.sonar_metrics_and_report.outputs.duplications || 0 }},
+                      "sonar_report_url": "${{ steps.sonar_metrics_and_report.outputs.sonar_report_url || '' }}",
                       "last_sonar_analysis_date": "$(date +%Y-%m-%dT%H:%M:%SZ)"
                     }
