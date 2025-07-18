@@ -84,7 +84,7 @@ jobs:
               env:
                 SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
                 shell: bash
-            - name: Actualizar propiedades a Port.io
+            - name: Update properties to Port.io
               #if: always()
               uses: port-labs/port-github-action@v1.7.2
               with:
@@ -96,7 +96,7 @@ jobs:
                   blueprint: ${{ github.event.inputs.blueprint_id }}
                   properties: |
                     {
-                      "sonar_quality_gate_status": "${{ steps.sonarqube-quality-gate-check.outputs.qualityGateStatus }}",
+                      "sonar_quality_gate_status": "${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}",
                       "sonar_bugs": ${{ steps.sonar_metrics.outputs.bugs || 0 }},
                       "sonar_vulnerabilities": ${{ steps.sonar_metrics.outputs.vulnerabilities || 0 }},
                       "sonar_code_smells": ${{ steps.sonar_metrics.outputs.code_smells || 0 }},
@@ -105,26 +105,3 @@ jobs:
                       "sonar_report_url": "${{ steps.sonar_report_url.outputs.sonar_report_url || '' }}",
                       "last_sonar_analysis_date": "$(date +%Y-%m-%dT%H:%M:%SZ)"
                     }
-            - name: Reportar estado y métricas a Port.io
-              #if: always()
-              uses: port-labs/port-github-action@v1.7.2
-              with:
-                  clientId: ${{ secrets.PORT_CLIENT_ID }}
-                  clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-                  operation: PATCH_RUN
-                  baseUrl: https://api.getport.io
-                  runId: ${{ github.event.inputs.port_run_id }}
-                  status: ${{ (steps.sonarqube-quality-gate-check.outputs.qualityGateStatus == 'PASSED' && 'SUCCESS') || (steps.sonarqube-quality-gate-check.outputs.qualityGateStatus == 'FAILED' && 'FAILURE') || 'PENDING' }}
-                  logMessage: |
-                    --- Resumen de la Ejecución ---
-                    --- Métricas de Calidad de SonarCloud ---
-                    Bugs: ${{ steps.sonar_metrics.outputs.bugs }}
-                    Vulnerabilidades: ${{ steps.sonar_metrics.outputs.vulnerabilities }}
-                    Code Smells: ${{ steps.sonar_metrics.outputs.code_smells }}
-                    Cobertura (%): ${{ steps.sonar_metrics.outputs.coverage }}
-                    Duplicaciones (%): ${{ steps.sonar_metrics.outputs.duplications }}
-                    Reporte: ${{ steps.sonar_report_url.outputs.sonar_report_url }}
-            - name: Build and Pack
-              run: echo "Building and packing artifact"
-            - name: Sending to Nexus
-              run: echo "Uploading artifact"
