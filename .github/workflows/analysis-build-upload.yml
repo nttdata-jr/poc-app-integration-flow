@@ -72,7 +72,7 @@ jobs:
               run: |
                 SONAR_ORGANIZATION="nttdata-jr"
                 SONAR_PROJECT_KEY="${{ github.event.inputs.repository_name }}"
-                SONAR_API_URL="https://sonarcloud.io/api/measures/search?projectKeys=hello-world-biec&metricKeys=bugs,vulnerabilities,code_smells,coverage,duplicated_lines_density"
+                SONAR_API_URL="https://sonarcloud.io/api/measures/search?projectKeys=${{ github.event.inputs.repository_name }}&metricKeys=bugs,vulnerabilities,code_smells,coverage,duplicated_lines_density"
                 echo "Calling SonarCloud API URL: ${SONAR_API_URL}"
                 curl -v -H "Authorization: Basic $(echo -n ${{ secrets.SONAR_TOKEN }}: | base64)" "${SONAR_API_URL}" > api_response.json
                 echo "API Response:"
@@ -80,12 +80,12 @@ jobs:
                 echo ""
                 echo "Checking for 'component' in response:"
                 jq .component api_response.json || true
-                echo ${{ steps.sonarqube-quality-gate-check.outputs.qualityGateStatus }}
+                echo ${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}
               env:
                 SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
                 shell: bash
             - name: Actualizar propiedades a Port.io
-              if: always()
+              #if: always()
               uses: port-labs/port-github-action@v1.7.2
               with:
                   clientId: ${{ secrets.PORT_CLIENT_ID }}
@@ -106,7 +106,7 @@ jobs:
                       "last_sonar_analysis_date": "$(date +%Y-%m-%dT%H:%M:%SZ)"
                     }
             - name: Reportar estado y métricas a Port.io
-              if: always()
+              #if: always()
               uses: port-labs/port-github-action@v1.7.2
               with:
                   clientId: ${{ secrets.PORT_CLIENT_ID }}
