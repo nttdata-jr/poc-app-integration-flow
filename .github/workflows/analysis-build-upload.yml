@@ -85,13 +85,11 @@ jobs:
                 CODE_SMELLS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric == "code_smells").value // "0"')
                 #COVERAGE=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric == "coverage").value // "0.0"')
                 DUPLICATIONS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric == "duplicated_lines_density").value // "0.0"')
-                echo "::set-output name=bugs::${BUGS}"
-                echo "::set-output name=vulnerabilities::${VULNERABILITIES}"
-                echo "::set-output name=code_smells::${CODE_SMELLS}"
-                #echo "coverage=${COVERAGE}" >> $GITHUB_OUTPUT
-                #echo "::set-output name=coverage::${COVERAGE}"
-                echo "::set-output name=duplications::${DUPLICATIONS}"
-                echo "::set-output name=sonar_report_url::${SONAR_REPORT_URL}"
+                echo "bugs=${BUGS}" >> $GITHUB_OUTPUT
+                echo "vulnerabilities=${VULNERABILITIES}" >> $GITHUB_OUTPUT
+                echo "code_smells=${CODE_SMELLS}" >> $GITHUB_OUTPUT
+                echo "duplications=${DUPLICATIONS}" >> $GITHUB_OUTPUT
+                echo "sonar_report_url=${SONAR_REPORT_URL}" >> $GITHUB_OUTPUT
                 echo "date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
               env:
                 SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
