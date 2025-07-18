@@ -96,7 +96,7 @@ jobs:
             #     shell: bash
             - name: Sonar Composite Actions
               id: sonar_metrics_and_report
-              uses: nttdata-jr/ci-template/.github/actions/sonar-metrics@v1
+              uses: nttdata-jr/ci-templates/.github/actions/sonar-metrics@v1.0.0
               with:
                 project_key: ${{ github.event.inputs.repository_name }}
             - name: Update properties to Port.io
