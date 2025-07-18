@@ -83,7 +83,7 @@ jobs:
                 BUGS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric == "bugs").value // "0"')
                 VULNERABILITIES=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric == "vulnerabilities").value // "0"')
                 CODE_SMELLS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric == "code_smells").value // "0"')
-                # COVERAGE=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric == "coverage").value // "0.0"')
+                COVERAGE=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric == "coverage").value // "0.0"')
                 DUPLICATIONS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric == "duplicated_lines_density").value // "0.0"')
                 echo "bugs=${BUGS}"
                 echo "::set-output name=bugs::${BUGS}"
@@ -91,8 +91,8 @@ jobs:
                 echo "::set-output name=vulnerabilities::${VULNERABILITIES}"
                 echo "code_smells=${CODE_SMELLS}"
                 echo "::set-output name=code_smells::${CODE_SMELLS}"
-                # echo "coverage=${COVERAGE}" >> $GITHUB_OUTPUT
-                # echo "::set-output name=coverage::${COVERAGE}"
+                echo "coverage=${COVERAGE}" >> $GITHUB_OUTPUT
+                echo "::set-output name=coverage::${COVERAGE}"
                 echo "duplications=${DUPLICATIONS}"
                 echo "::set-output name=duplications::${DUPLICATIONS}"
                 echo "sonar_report_url=${SONAR_REPORT_URL}"
@@ -120,3 +120,26 @@ jobs:
                       "sonar_report_url": "${{ steps.sonar_metrics_and_report.outputs.sonar_report_url || '' }}",
                       "last_sonar_analysis_date": "$(date +%Y-%m-%dT%H:%M:%SZ)"
                     }
+            - name: Reporting metrics and states to Port.io
+              if: always()
+              uses: port-labs/port-github-action@v1.7.2
+              with:
+                  clientId: ${{ secrets.PORT_CLIENT_ID }}
+                  clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+                  operation: PATCH_RUN
+                  baseUrl: https://api.getport.io
+                  runId: ${{ github.event.inputs.port_run_id }}
+                  status: ${{ (steps.sonarqube-quality-gate-check.outputs.quality-gate-status == 'PASSED' && 'SUCCESS') || (steps.sonarqube-quality-gate-check.outputs.quality-gate-status == 'FAILED' && 'FAILURE') || 'PENDING' }}
+                  logMessage: |
+                    --- Resumen de la Ejecución ---
+                    --- Métricas de Calidad de SonarCloud ---
+                    Bugs: ${{ steps.sonar_metrics_and_report.outputs.bugs }}
+                    Vulnerabilidades: ${{ steps.sonar_metrics_and_report.outputs.vulnerabilities }}
+                    Code Smells: ${{ steps.sonar_metrics_and_report.outputs.code_smells }}
+                    Cobertura (%): ${{ steps.sonar_metrics_and_report.outputs.coverage }}
+                    Duplicaciones (%): ${{ steps.sonar_metrics_and_report.outputs.duplications }}
+                    Reporte: ${{ steps.sonar_metrics_and_report.outputs.sonar_report_url }}
+            - name: Build and Pack
+              run: echo "Building and packing artifact"
+            - name: Sending to Nexus
+              run: echo "Uploading artifact"
