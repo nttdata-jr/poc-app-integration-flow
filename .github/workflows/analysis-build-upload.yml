@@ -67,33 +67,38 @@ jobs:
                   pollingTimeoutSec: 600
               env:
                   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-            - name: Get SonarCloud Metrics and Report
+            # - name: Get SonarCloud Metrics and Report
+            #   id: sonar_metrics_and_report
+            #   run: |
+            #     SONAR_ORGANIZATION="${{ github.repository_owner }}"
+            #     SONAR_PROJECT_KEY="${{ github.event.inputs.repository_name }}"
+            #     SONAR_REPORT_URL="https://sonarcloud.io/dashboard?id=${SONAR_PROJECT_KEY}"
+            #     SONAR_API_URL="https://sonarcloud.io/api/measures/search?projectKeys=${{ github.event.inputs.repository_name }}&metricKeys=bugs,vulnerabilities,code_smells,coverage,duplicated_lines_density"
+            #     echo "Sonar Report URL: ${SONAR_REPORT_URL}"
+            #     echo "Calling SonarCloud API URL: ${SONAR_API_URL}"
+            #     METRICS_RESPONSE=$(curl -s -H "Authorization: Basic $(echo -n ${{ secrets.SONAR_TOKEN }}: | base64)" "${SONAR_API_URL}")
+            #     echo "API Response Raw:"
+            #     echo "${METRICS_RESPONSE}"
+            #     # Extraer métricas usando jq, buscando en el array 'measures'
+            #     BUGS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric=="bugs") | .value')
+            #     VULNERABILITIES=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric=="vulnerabilities") | .value')
+            #     CODE_SMELLS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric=="code_smells") | .value')
+            #     #COVERAGE=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric=="coverage") | .value')
+            #     DUPLICATIONS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric=="duplicated_lines_density") | .value')
+            #     echo "bugs=${BUGS:-0}"             >> $GITHUB_OUTPUT
+            #     echo "vulnerabilities=${VULNERABILITIES:-0}" >> $GITHUB_OUTPUT
+            #     echo "code_smells=${CODE_SMELLS:-0}"             >> $GITHUB_OUTPUT
+            #     echo "duplications=${DUPLICATIONS:-0}" >> $GITHUB_OUTPUT
+            #     echo "sonar_report_url=${SONAR_REPORT_URL}" >> $GITHUB_OUTPUT
+            #     echo "date=$(TZ=America/Guayaquil date +'%d-%m-%YT%H:%M:%S%:z')" >> $GITHUB_OUTPUT
+            #   env:
+            #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+            #     shell: bash
+            - name: Sonar Composite Actions
               id: sonar_metrics_and_report
-              run: |
-                SONAR_ORGANIZATION="${{ github.repository_owner }}"
-                SONAR_PROJECT_KEY="${{ github.event.inputs.repository_name }}"
-                SONAR_REPORT_URL="https://sonarcloud.io/dashboard?id=${SONAR_PROJECT_KEY}"
-                SONAR_API_URL="https://sonarcloud.io/api/measures/search?projectKeys=${{ github.event.inputs.repository_name }}&metricKeys=bugs,vulnerabilities,code_smells,coverage,duplicated_lines_density"
-                echo "Sonar Report URL: ${SONAR_REPORT_URL}"
-                echo "Calling SonarCloud API URL: ${SONAR_API_URL}"
-                METRICS_RESPONSE=$(curl -s -H "Authorization: Basic $(echo -n ${{ secrets.SONAR_TOKEN }}: | base64)" "${SONAR_API_URL}")
-                echo "API Response Raw:"
-                echo "${METRICS_RESPONSE}"
-                # Extraer métricas usando jq, buscando en el array 'measures'
-                BUGS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric=="bugs") | .value')
-                VULNERABILITIES=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric=="vulnerabilities") | .value')
-                CODE_SMELLS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric=="code_smells") | .value')
-                #COVERAGE=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric=="coverage") | .value')
-                DUPLICATIONS=$(echo "${METRICS_RESPONSE}" | jq -r '.measures[] | select(.metric=="duplicated_lines_density") | .value')
-                echo "bugs=${BUGS:-0}"             >> $GITHUB_OUTPUT
-                echo "vulnerabilities=${VULNERABILITIES:-0}" >> $GITHUB_OUTPUT
-                echo "code_smells=${CODE_SMELLS:-0}"             >> $GITHUB_OUTPUT
-                echo "duplications=${DUPLICATIONS:-0}" >> $GITHUB_OUTPUT
-                echo "sonar_report_url=${SONAR_REPORT_URL}" >> $GITHUB_OUTPUT
-                echo "date=$(TZ=America/Guayaquil date +'%d-%m-%YT%H:%M:%S%:z')" >> $GITHUB_OUTPUT
-              env:
-                SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-                shell: bash
+              user: ${{ github.repository_owner }}/ci-template/.github/actions/sonar-metrics@v1
+              with:
+                project_key: ${{ github.event.inputs.repository_name }}
             - name: Update properties to Port.io
               #if: always()
               uses: port-labs/port-github-action@v1.7.2
