@@ -1,0 +1,17 @@
+name: 'Setup Java'
+description: 'Configura Java y genera arquetipo'
+inputs:
+  version:
+    required: true
+    description: 'Versión de Java'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Java
+      run: echo "Setting up Java version ${{ inputs.version }}"
+      # uses: actions/setup-java@v4
+      # with:
+      #   java-version: ${{ inputs.version }}
+    - name: Scaffold arquetipo Java
+      run: echo "creando arquetipo" #./scripts/scaffold-java.sh ${{ inputs.version }}
