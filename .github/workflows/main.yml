@@ -8,7 +8,7 @@ on:
         required: true
         type: string
       version:
-        description: 'Versión del lenguaje (ej: 17, 21, 8, 18)'
+        description: 'Versión del lenguaje (ej: 17, 21, V8, 18)'
         required: true
         type: string
 
@@ -27,6 +27,6 @@ jobs:
           version: ${{ github.event.inputs.version }}
       - name: Setup and Scaffold dotnet
         if: ${{ github.event.inputs.language == 'dotnet' }}
-        uses: ./.actions/setup-dotnet
+        uses: ./.github/actions/setup-dotnet
         with:
           version: ${{ github.event.inputs.version }}
