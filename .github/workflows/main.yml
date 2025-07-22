@@ -22,11 +22,11 @@ jobs:
         uses: actions/checkout@v4.2.2
       - name: Setup and Scaffold java
         if: ${{ github.event.inputs.language == 'java' }}
-        uses: ./actions/setup-java/action
+        uses: ./.github/actions/setup-java
         with:
           version: ${{ github.event.inputs.version }}
       - name: Setup and Scaffold dotnet
         if: ${{ github.event.inputs.language == 'dotnet' }}
-        uses: ./actions/setup-dotnet/action
+        uses: ./.actions/setup-dotnet
         with:
           version: ${{ github.event.inputs.version }}
