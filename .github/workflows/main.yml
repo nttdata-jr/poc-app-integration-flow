@@ -1,0 +1,26 @@
+name: Crear Arquetipos Multi-Lenguaje
+
+on:
+  workflow_dispatch:
+    inputs:
+      language:
+        description: 'Lenguaje del proyecto (ej: java, dotnet, angular, react)'
+        required: true
+        type: string
+      version:
+        description: 'Versión del lenguaje (ej: 17, 21, 8, 18)'
+        required: true
+        type: string
+
+jobs:
+  crear-arquetipo:
+    runs-on: ${{ 
+      github.event.inputs.language == 'dotnet' && 'windows-latest' ||
+      'ubuntu-latest' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+      - name: Setup and Scaffold ${{ github.event.inputs.language }} ${{ github.event.inputs.version }}
+        uses: ./actions/setup-${{ github.event.inputs.language }}
+        with:
+          version: ${{ github.event.inputs.version }}
