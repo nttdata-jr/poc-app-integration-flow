@@ -10,5 +10,10 @@ runs:
   steps:
     - name: Setup Java
       run: echo "Setting up Java version ${{ inputs.version }}"
+      shell: bash
+      # uses: actions/setup-java@v4
+      # with:
+      #   java-version: ${{ inputs.version }}
     - name: Scaffold arquetipo Java
-      run: echo "creando arquetipo"
+      run: echo "creando arquetipo" #./scripts/scaffold-java.sh ${{ inputs.version }}
+      shell: bash
