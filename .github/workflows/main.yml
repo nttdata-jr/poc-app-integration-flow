@@ -20,7 +20,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4.2.2
-      - name: Setup and Scaffold ${{ github.event.inputs.language }} ${{ github.event.inputs.version }}
-        uses: ./actions/setup-${{ github.event.inputs.language }}
+      - name: Setup and Scaffold java
+        if: ${{ github.event.inputs.language == 'java' }}
+        uses: ./actions/setup-java/action
+        with:
+          version: ${{ github.event.inputs.version }}
+      - name: Setup and Scaffold dotnet
+        if: ${{ github.event.inputs.language == 'dotnet' }}
+        uses: ./actions/setup-dotnet/action
         with:
           version: ${{ github.event.inputs.version }}
