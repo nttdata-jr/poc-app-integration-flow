@@ -1,0 +1,17 @@
+name: 'Setup dotnet'
+description: 'Configura dotnet y genera arquetipo'
+inputs:
+  version:
+    required: true
+    description: 'Versión de framework'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup dotnet
+      run: echo "Setting up dotnet version ${{ inputs.version }}"
+      # uses: actions/setup-java@v4
+      # with:
+      #   java-version: ${{ inputs.version }}
+    - name: Scaffold arquetipo dotnet
+      run: echo "creando arquetipo" #./scripts/scaffold-java.sh ${{ inputs.version }}
