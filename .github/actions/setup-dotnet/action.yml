@@ -10,8 +10,10 @@ runs:
   steps:
     - name: Setup dotnet
       run: echo "Setting up dotnet version ${{ inputs.version }}"
+      shell: bash
       # uses: actions/setup-java@v4
       # with:
       #   java-version: ${{ inputs.version }}
     - name: Scaffold arquetipo dotnet
       run: echo "creando arquetipo" #./scripts/scaffold-java.sh ${{ inputs.version }}
+      shell: bash
